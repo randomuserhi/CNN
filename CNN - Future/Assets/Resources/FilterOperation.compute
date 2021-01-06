@@ -1,0 +1,686 @@
+﻿#pragma kernel FilterOperationTexture_8
+#pragma kernel FilterOperationTexture_16
+#pragma kernel FilterOperationTexture_32
+#pragma kernel FilterOperationMatrix_8
+#pragma kernel FilterOperationMatrix_16
+#pragma kernel FilterOperationMatrix_32
+#pragma kernel BackPropFilterOperationTexture_8
+#pragma kernel BackPropFilterOperationTexture_16
+#pragma kernel BackPropFilterOperationTexture_32
+#pragma kernel BackPropFilterOperationMatrix_8
+#pragma kernel BackPropFilterOperationMatrix_16
+#pragma kernel BackPropFilterOperationMatrix_32
+#pragma kernel PoolingOperation_8
+#pragma kernel PoolingOperation_16
+#pragma kernel PoolingOperation_32
+#pragma kernel BackPropPoolingOperation_8
+#pragma kernel BackPropPoolingOperation_16
+#pragma kernel BackPropPoolingOperation_32
+#pragma kernel DialateMatrix
+#pragma kernel GenerateTexture
+//NOTE:: conver pooling operation and backproppooling to use do while loops or something
+
+
+int FilterWidth;
+int FilterHeight;
+int Stride;
+int ZeroPadding;
+int ConvolutionWidth;
+int ConvolutionHeight;
+int TextureWidth;
+int TextureHeight;
+int Depth;
+RWTexture2D<float4> TextureInput;
+RWStructuredBuffer<float> ConvolutionTensor;
+
+[numthreads(8,1,1)]
+void FilterOperationTexture_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+	
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(16, 1, 1)]
+void FilterOperationTexture_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(32, 1, 1)]
+void FilterOperationTexture_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(1, 8, 1)]
+void BackPropFilterOperationTexture_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(1, 16, 1)]
+void BackPropFilterOperationTexture_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(1, 32, 1)]
+void BackPropFilterOperationTexture_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	uint2 LocationOnTexture = uint2(X, Y);
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		if (id.z == 0)
+			Value = TextureInput[LocationOnTexture].x * 2 - 1;
+		else if (id.z == 1)
+			Value = TextureInput[LocationOnTexture].y * 2 - 1;
+		else if (id.z == 2)
+			Value = TextureInput[LocationOnTexture].z * 2 - 1;
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+RWStructuredBuffer<float> MatrixInput;
+
+[numthreads(8, 1, 1)]
+void FilterOperationMatrix_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(16, 1, 1)]
+void FilterOperationMatrix_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(32, 1, 1)]
+void FilterOperationMatrix_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+[numthreads(1, 8, 1)]
+void BackPropFilterOperationMatrix_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+[numthreads(1, 16, 1)]
+void BackPropFilterOperationMatrix_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+[numthreads(1, 32, 1)]
+void BackPropFilterOperationMatrix_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y >= (uint)(FilterWidth * FilterHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	int InnerPatchY = id.y / FilterHeight;
+	int InnerPatchX = id.y - FilterWidth * InnerPatchY;
+	int X = -ZeroPadding + PatchX * Stride + InnerPatchX;
+	int Y = -ZeroPadding + PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.z];
+	}
+	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
+}
+
+RWTexture2D<float4> Output;
+RWStructuredBuffer<float> Tensor;
+
+float Sigmoid(float Value)
+{
+	float Exp = exp(Value);
+	return Exp / (Exp + 1.0);
+}
+
+[numthreads(8, 1, 1)]
+void PoolingOperation_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+	
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = - FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+		}
+	}
+	ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y] = Value;
+}
+
+[numthreads(16, 1, 1)]
+void PoolingOperation_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = -FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+		}
+	}
+	ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y] = Value;
+}
+
+[numthreads(32, 1, 1)]
+void PoolingOperation_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = -FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+		}
+	}
+	ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y] = Value;
+}
+
+[numthreads(8, 1, 1)]
+void BackPropPoolingOperation_8(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+
+	int MaxIndex = 0;
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = -FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+			MaxIndex = i;
+		}
+	}
+	for (i = 0; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			if (MaxIndex != i) //If its not the max index set the tensor to 0
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = 0;
+			}
+			else //if it is set to the relevant LayerDelta value
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y];
+			}
+		}
+	}
+}
+
+[numthreads(16, 1, 1)]
+void BackPropPoolingOperation_16(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+
+	int MaxIndex = 0;
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = -FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+			MaxIndex = i;
+		}
+	}
+	for (i = 0; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			if (MaxIndex != i) //If its not the max index set the tensor to 0
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = 0;
+			}
+			else //if it is set to the relevant LayerDelta value
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y];
+			}
+		}
+	}
+}
+
+[numthreads(32, 1, 1)]
+void BackPropPoolingOperation_32(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)(ConvolutionWidth * ConvolutionHeight))
+		return;
+
+	int ArraySize = FilterWidth * FilterHeight;
+
+	int PatchY = id.x / ConvolutionWidth;
+	int PatchX = id.x - ConvolutionWidth * PatchY;
+
+	int MaxIndex = 0;
+	int InnerPatchY = 0;//0 / FilterHeight;
+	int InnerPatchX = -FilterWidth * InnerPatchY;
+	int X = PatchX * Stride + InnerPatchX;
+	int Y = PatchY * Stride + InnerPatchY;
+	float Value = 0;
+	if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+	{
+		Value = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+	}
+	for (int i = 1; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		float Val = 0;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			Val = MatrixInput[Depth * (Y * TextureWidth + X) + id.y];
+		}
+		if (Value < Val)
+		{
+			Value = Val;
+			MaxIndex = i;
+		}
+	}
+	for (i = 0; i < FilterWidth * FilterHeight; i++)
+	{
+		InnerPatchY = i / FilterHeight;
+		InnerPatchX = i - FilterWidth * InnerPatchY;
+		X = PatchX * Stride + InnerPatchX;
+		Y = PatchY * Stride + InnerPatchY;
+		if (X >= 0 && Y >= 0 && X < TextureWidth && Y < TextureHeight)
+		{
+			if (MaxIndex != i) //If its not the max index set the tensor to 0
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = 0;
+			}
+			else //if it is set to the relevant LayerDelta value
+			{
+				MatrixInput[Depth * (Y * TextureWidth + X) + id.y] = ConvolutionTensor[Depth * (PatchY * ConvolutionWidth + PatchX) + id.y];
+			}
+		}
+	}
+}
+
+int OutputDepth;
+int NonDialatedWidth;
+int NonDialatedHeight;
+int DStride;
+RWStructuredBuffer<float> NonDialatedOutput;
+RWStructuredBuffer<float> DialatedOutput;
+
+[numthreads(8, 8, 1)]
+void DialateMatrix(uint3 id : SV_DispatchThreadID)
+{
+	//id.x represents x position of output tensor
+	//id.y represents y position of output tensor
+	//id.z represents Depth
+
+	if (id.x >= NonDialatedWidth || id.y >= NonDialatedHeight) return;
+
+	int DialatedPositionX = id.x + (id.x * DStride);
+	int DialatedPositionY = id.y + (id.y * DStride);
+	int DialatedWidth = NonDialatedWidth + (NonDialatedWidth - 1) * DStride;
+	int DialatedHeight = NonDialatedHeight + (NonDialatedHeight - 1) * DStride;
+	int DialatedSize = DialatedWidth * DialatedHeight;
+	for (int i = 0; i < Depth; i++)
+	{
+		DialatedOutput[OutputDepth * (i * DialatedSize + DialatedPositionY * DialatedWidth + DialatedPositionX) + id.z] = NonDialatedOutput[OutputDepth * (id.y * NonDialatedWidth + id.x) + id.z];
+	}
+}
+
+int NumFeatureMaps;
+int FilterIndex;
+int RenderBufferLength;
+
+[numthreads(8, 8, 1)]
+void GenerateTexture(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= (uint)ConvolutionWidth || id.y >= (uint)ConvolutionHeight)
+		return;
+	if (FilterIndex >= NumFeatureMaps) FilterIndex = NumFeatureMaps - 1;
+	int Size = ConvolutionWidth * ConvolutionHeight;
+	int Index = (id.y * ConvolutionWidth + id.x) * NumFeatureMaps + FilterIndex;
+	if (Index < RenderBufferLength)
+	{
+		//float Val = Sigmoid(Tensor[Index]);
+		//float Val = (Tensor[Index] + 1) / 2;
+		float Val = Tensor[Index];
+		Output[id.xy] = float4(Val, Val, Val, 1);
+	}
+	else
+	{
+		Output[id.xy] = float4(0, 0, 0, 0);
+	}
+}
