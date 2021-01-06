@@ -67,7 +67,7 @@ public class CNN : MonoBehaviour
 
     public bool Training;
 
-    public void Start() //TODO:: think why relu breaks
+    public void Start() //TODO:: Implement batch normalization, backprop momentum (so gradient descent doesnt get fooled by flat planes) and initializing weights and biases using a standard method rather than between 1 and -1
     {
         /*N = new Network();
         N.Model.Add(new ConvolutionTextureLayer(new TensorSize(Inputs[0].width, Inputs[0].height, 3), 3, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
@@ -101,16 +101,16 @@ public class CNN : MonoBehaviour
         {
             Network N = new Network();
             N.CostFunc = Network.CostFunctionType.SoftMaxCrossEntropy;
-            N.Model.Add(new ConvolutionTextureLayer(new TensorSize(100, 60, 3), 10, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
+            N.Model.Add(new ConvolutionTextureLayer(D.InputDataSize, 10, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
             N.Model.Add(new PoolingLayer(N.Model[0].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
+            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
             N.Model.Add(new PoolingLayer(N.Model[2].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[3].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
+            N.Model.Add(new ConvolutionMatrixLayer(N.Model[3].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
             N.Model.Add(new PoolingLayer(N.Model[4].OutputTensor, 2, 2));
             N.Model.Add(new FlatteningLayer(N.Model[5].OutputTensor));
-            N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.ReLU));
-            N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.ReLU));
-            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.ReLU));
+            N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
             NetworkList[i] = N;
         }
         Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 500, 0.1f);

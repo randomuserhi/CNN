@@ -202,7 +202,7 @@ public abstract class NetworkLearning
             }
         }
         TestIndex++;
-        if (TestIndex > DataSet.TestSet.Count)
+        if (TestIndex >= DataSet.TestSet.Count)
         {
             ResetTest();
         }
