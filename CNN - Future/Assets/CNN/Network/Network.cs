@@ -28,6 +28,12 @@ public abstract class DataSet
         this.ClassNamesFileLocation = ClassNamesFileLocation;
         this.DataSetCfgFileLocation = DataSetCfgFileLocation;
     }
+
+    public void ShuffleData()
+    {
+        TrainingSet = TrainingSet.OrderBy(a => UnityEngine.Random.value).ToList();
+        TestSet = TestSet.OrderBy(a => UnityEngine.Random.value).ToList();
+    }
 }
 
 public class ImageDataSet : DataSet
@@ -97,6 +103,9 @@ public abstract class NetworkLearning
         }
         TotalCorrect = new int[Networks.Length];
         TotalErrorCost = new float[Networks.Length];
+        TotalBatchErrorCost = new float[Networks.Length];
+
+        this.DataSet.ShuffleData();
     }
 
     public int LayerRenderIndex = 0;
@@ -106,6 +115,7 @@ public abstract class NetworkLearning
     private int TrainingIndex = 0;
     private int BatchIndex = 0;
     private float[] TotalErrorCost;
+    private float[] TotalBatchErrorCost;
     private Network.BackPropagationEvaluation[][] BatchEvaluation;
     public void PerformSingleTeachOperation(bool Render)
     {
@@ -116,6 +126,7 @@ public abstract class NetworkLearning
             if (DisplayEachBatch)
                 PrintSingleBatchEvaluation(BatchEvaluation[i][BatchIndex], i, Batch, Epoch, BatchIndex);
             TotalErrorCost[i] += BatchEvaluation[i][BatchIndex].ErrorCost;
+            TotalBatchErrorCost[i] += BatchEvaluation[i][BatchIndex].ErrorCost;
             if (Render)
             {
                 Networks[i].RenderModel(LayerRenderIndex);
@@ -126,25 +137,26 @@ public abstract class NetworkLearning
         {
             BatchIndex = 0;
             PrintEndBatchEvaluation();
+            EvaluateNetworks();
             for (int i = 0; i < Networks.Length; i++)
             {
-                TotalErrorCost[i] = 0;
+                TotalBatchErrorCost[i] = 0;
             }
             Batch++;
-            EvaluateNetworks();
         }
         TrainingIndex++;
-        if (TrainingIndex > DataSet.TrainingSet.Count)
+        if (TrainingIndex >= DataSet.TrainingSet.Count)
         {
             TrainingIndex = 0;
             BatchIndex = 0;
-            PrintEndBatchEvaluation();
+            PrintEndEpochEvaluation();
+            EvaluateNetworks();
             for (int i = 0; i < Networks.Length; i++)
             {
                 TotalErrorCost[i] = 0;
             }
             Batch = 0;
-            EvaluateNetworks();
+            DataSet.ShuffleData();
         }
     }
 
@@ -197,6 +209,7 @@ public abstract class NetworkLearning
 
     public void ResetTest()
     {
+        DataSet.ShuffleData();
         for (int i = 0; i < Networks.Length; i++)
         {
             Debug.Log("Network " + i + " > " + ((float)TotalCorrect[i] / TestIndex) + " > [" + TotalCorrect[i] + "/" + TestIndex + "]");
@@ -223,6 +236,16 @@ public abstract class NetworkLearning
         Debug.Log("--- BATCH SUMMARY ---");
         for (int i = 0; i < Networks.Length; i++)
         {
+            Debug.Log("Network " + i + " > " + Epoch + " > [" + TotalBatchErrorCost[i] + "]");
+        }
+        Debug.Log("--- ------------- ---");
+    }
+
+    private void PrintEndEpochEvaluation()
+    {
+        Debug.Log("--- EPOCH SUMMARY ---");
+        for (int i = 0; i < Networks.Length; i++)
+        {
             Debug.Log("Network " + i + " > " + Epoch + " > [" + TotalErrorCost[i] + "]");
         }
         Debug.Log("--- ------------- ---");
@@ -246,7 +269,7 @@ public abstract class NetworkLearning
                     SummedDelta.Deltas[l].BiasDeltas.CopyValues(BatchEvaluation[i][0].Deltas[l].BiasDeltas.GetData());
                 }
             }
-            for (int j = 1; j < BatchEvaluation.Length; j++)
+            for (int j = 1; j < BatchEvaluation[i].Length; j++)
             {
                 for (int k = 0; k < BatchEvaluation[i][j].Deltas.Length; k++)
                 {

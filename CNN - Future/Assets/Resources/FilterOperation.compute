@@ -675,8 +675,8 @@ void GenerateTexture(uint3 id : SV_DispatchThreadID)
 	if (Index < RenderBufferLength)
 	{
 		//float Val = Sigmoid(Tensor[Index]);
-		//float Val = (Tensor[Index] + 1) / 2;
-		float Val = Tensor[Index];
+		float Val = (Tensor[Index] + 1) / 2;
+		//float Val = Tensor[Index];
 		Output[id.xy] = float4(Val, Val, Val, 1);
 	}
 	else

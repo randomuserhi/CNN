@@ -67,7 +67,7 @@ public class CNN : MonoBehaviour
 
     public bool Training;
 
-    public void Start()
+    public void Start() //TODO:: think why relu breaks
     {
         /*N = new Network();
         N.Model.Add(new ConvolutionTextureLayer(new TensorSize(Inputs[0].width, Inputs[0].height, 3), 3, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
@@ -89,6 +89,13 @@ public class CNN : MonoBehaviour
             @"C:\Users\LenovoY720\Documents\ImageDataSets\ImageLabels.csv"
         );
 
+        /*ImageDataSet D = new ImageDataSet(
+            new TensorSize(100, 60),
+            @"C:\Users\LenovoY720\Documents\ImageDataSets",
+            @"C:\Users\LenovoY720\Documents\ImageDataSets\ClassNamesSmol.csv",
+            @"C:\Users\LenovoY720\Documents\ImageDataSets\ImageLabelsSmol.csv"
+        );*/
+
         Network[] NetworkList = new Network[1];
         for (int i = 0; i < NetworkList.Length; i++)
         {
@@ -102,8 +109,7 @@ public class CNN : MonoBehaviour
             N.Model.Add(new FlatteningLayer(N.Model[5].OutputTensor));
             N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
             N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[9].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
             NetworkList[i] = N;
         }
         Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 100, 0.1f);
