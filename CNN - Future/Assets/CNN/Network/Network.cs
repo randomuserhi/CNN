@@ -156,6 +156,7 @@ public abstract class NetworkLearning
                 TotalErrorCost[i] = 0;
             }
             Batch = 0;
+            Epoch++;
             DataSet.ShuffleData();
         }
     }
@@ -400,7 +401,7 @@ public class Network
         SoftMaxCrossEntropy
     }
 
-    public CostFunctionType CostFunc = CostFunctionType.SoftMaxCrossEntropy;
+    public CostFunctionType CostFunc = CostFunctionType.SquaredError;
     public List<Layer> Model = new List<Layer>();
 
     public void Dispose()

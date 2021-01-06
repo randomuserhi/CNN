@@ -370,6 +370,8 @@ public abstract class ConvolutionLayer : Layer
 
     public override void ApplyWeightBiasDeltas(Network.WeightBiasDeltas WeightBiasDeltas, float LearningRate)
     {
+        Debug.Log("CW:" + WeightBiasDeltas.WeightDeltas);
+        Debug.Log("CB:" + WeightBiasDeltas.BiasDeltas);
         FilterTensor.SubInPlace(WeightBiasDeltas.WeightDeltas * LearningRate);
         Bias.SubInPlace(WeightBiasDeltas.BiasDeltas * LearningRate);
     }

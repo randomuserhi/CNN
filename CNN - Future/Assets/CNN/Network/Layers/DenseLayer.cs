@@ -147,6 +147,8 @@ public class DenseLayer : Layer
 
     public override void ApplyWeightBiasDeltas(Network.WeightBiasDeltas WeightBiasDeltas, float LearningRate)
     {
+        Debug.Log("DW:" + WeightBiasDeltas.WeightDeltas);
+        Debug.Log("DB:" + WeightBiasDeltas.BiasDeltas);
         Weights.SubInPlace(WeightBiasDeltas.WeightDeltas * LearningRate);
         Bias.SubInPlace(WeightBiasDeltas.BiasDeltas * LearningRate);
     }

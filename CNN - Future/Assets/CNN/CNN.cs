@@ -100,25 +100,27 @@ public class CNN : MonoBehaviour
         for (int i = 0; i < NetworkList.Length; i++)
         {
             Network N = new Network();
-            N.Model.Add(new ConvolutionTextureLayer(new TensorSize(100, 60, 3), 10, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
+            N.CostFunc = Network.CostFunctionType.SoftMaxCrossEntropy;
+            N.Model.Add(new ConvolutionTextureLayer(new TensorSize(100, 60, 3), 10, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
             N.Model.Add(new PoolingLayer(N.Model[0].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
+            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
             N.Model.Add(new PoolingLayer(N.Model[2].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[3].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
+            N.Model.Add(new ConvolutionMatrixLayer(N.Model[3].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.ReLU));
             N.Model.Add(new PoolingLayer(N.Model[4].OutputTensor, 2, 2));
             N.Model.Add(new FlatteningLayer(N.Model[5].OutputTensor));
-            N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.ReLU));
+            N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.ReLU));
+            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.ReLU));
             NetworkList[i] = N;
         }
-        Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 100, 0.1f);
+        Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 500, 0.1f);
     }
 
 
     private bool ResetTag = false;
     public bool DisplayEachBatch = true;
     public float LearningRate = 1f;
+    public bool Render = true;
 
     public void Update()
     {
@@ -126,7 +128,7 @@ public class CNN : MonoBehaviour
         Learner.DisplayEachBatch = DisplayEachBatch;
         if (Training)
         {
-            Learner.PerformSingleTeachOperation(true);
+            Learner.PerformSingleTeachOperation(Render);
             ResetTag = false;
         }
         else
@@ -136,7 +138,7 @@ public class CNN : MonoBehaviour
                 Learner.ResetTest();
                 ResetTag = true;
             }
-            Learner.PerformSingleTestOperation(true);
+            Learner.PerformSingleTestOperation(Render);
         }
     }
 }
