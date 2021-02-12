@@ -233,6 +233,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Training: 1
-  DisplayEachBatch: 1
-  LearningRate: 1
+  DisplayEachBatch: 0
+  LearningRate: 0.01
   Render: 0

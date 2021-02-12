@@ -101,19 +101,16 @@ public class CNN : MonoBehaviour
         {
             Network N = new Network();
             N.CostFunc = Network.CostFunctionType.SoftMaxCrossEntropy;
-            N.Model.Add(new ConvolutionTextureLayer(D.InputDataSize, 10, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
+            N.Model.Add(new ConvolutionTextureLayer(D.InputDataSize, 5, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
             N.Model.Add(new PoolingLayer(N.Model[0].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
+            N.Model.Add(new ConvolutionMatrixLayer(N.Model[1].OutputTensor, 5, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
             N.Model.Add(new PoolingLayer(N.Model[2].OutputTensor, 2, 2));
-            N.Model.Add(new ConvolutionMatrixLayer(N.Model[3].OutputTensor, 20, 3, 1, 0, ConvolutionLayer.ActivationType.Tanh));
-            N.Model.Add(new PoolingLayer(N.Model[4].OutputTensor, 2, 2));
-            N.Model.Add(new FlatteningLayer(N.Model[5].OutputTensor));
-            N.Model.Add(new DenseLayer(N.Model[6].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[7].OutputTensor, 200, DenseLayer.ActivationType.Tanh));
-            N.Model.Add(new DenseLayer(N.Model[8].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new FlatteningLayer(N.Model[3].OutputTensor));
+            N.Model.Add(new DenseLayer(N.Model[4].OutputTensor, 50, DenseLayer.ActivationType.Tanh));
+            N.Model.Add(new DenseLayer(N.Model[5].OutputTensor, D.OutputDataSize.Width, DenseLayer.ActivationType.Tanh));
             NetworkList[i] = N;
         }
-        Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 500, 0.1f);
+        Learner = new CNNNetworkLearning(Network.CostFunctionType.SoftMaxCrossEntropy, NetworkList, D, 8, 0.001f);
     }
 
 

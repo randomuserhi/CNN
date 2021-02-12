@@ -333,15 +333,6 @@ void BackPropFilterOperationMatrix_32(uint3 id : SV_DispatchThreadID)
 	ConvolutionTensor[id.z * ArraySize * Depth * ConvolutionWidth * ConvolutionHeight + id.x * ArraySize * Depth + id.z * ArraySize + id.y] = Value;
 }
 
-RWTexture2D<float4> Output;
-RWStructuredBuffer<float> Tensor;
-
-float Sigmoid(float Value)
-{
-	float Exp = exp(Value);
-	return Exp / (Exp + 1.0);
-}
-
 [numthreads(8, 1, 1)]
 void PoolingOperation_8(uint3 id : SV_DispatchThreadID)
 {
@@ -663,6 +654,15 @@ void DialateMatrix(uint3 id : SV_DispatchThreadID)
 int NumFeatureMaps;
 int FilterIndex;
 int RenderBufferLength;
+
+RWTexture2D<float4> Output;
+RWStructuredBuffer<float> Tensor;
+
+float Sigmoid(float Value)
+{
+	float Exp = exp(Value);
+	return Exp / (Exp + 1.0);
+}
 
 [numthreads(8, 8, 1)]
 void GenerateTexture(uint3 id : SV_DispatchThreadID)

@@ -85,7 +85,7 @@ public class PoolingLayer : Layer
 
     public override void ForwardProp()
     {
-        InputBuffer.SetData(((Matrix)Input).GetData());
+        InputBuffer.SetData(((Matrix)Input).Buffer);
 
         //Pick the correct number of thread groups based on size of image
         int TotalConvolutionTensorSize = OutputTensor.Width * OutputTensor.Height;

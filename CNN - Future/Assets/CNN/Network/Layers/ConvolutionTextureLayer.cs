@@ -179,7 +179,7 @@ public abstract class ConvolutionLayer : Layer
         BackpropLayerDeltasOperation.SetBuffer(DialateKernelIndex, "NonDialatedOutput", LayerDeltasNonDialatedOutputBuffer);
 
         BackpropLayerDeltasOperation.SetInt("Depth", LayerDeltaConvoTensor.Depth);
-        BackpropLayerDeltasOperation.SetInt("OutputDepth", OutputTensor.Depth);
+        BackpropLayerDeltasOperation.SetInt("OutputDepth", InputTensor.Depth);
         BackpropLayerDeltasOperation.SetInt("Stride", 1); //Stride for convolution
         BackpropLayerDeltasOperation.SetInt("DStride", Stride - 1); //Dialation Stride
         BackpropLayerDeltasOperation.SetInt("ConvolutionWidth", LayerDeltaConvoTensor.Width);

@@ -46,8 +46,19 @@ public class ImageDataSet : DataSet
     public ImageDataSet(TensorSize InputDataSize, string DataSetFilePath, string ClassNamesFileLocation, string DataSetCfgFileLocation) : base(DataSetFilePath, ClassNamesFileLocation, DataSetCfgFileLocation)
     {
         this.InputDataSize = InputDataSize;
-        ClassNames = File.ReadLines(ClassNamesFileLocation).ToString().Split(',');
+        string[] Classes = File.ReadAllLines(ClassNamesFileLocation);
+        ClassNames = Classes[0].Split(',');
+        string[] ClassGroups = Classes[1].Split(',');
         string[] DataSet = File.ReadAllLines(DataSetCfgFileLocation);
+
+        int[] IndexParser = new int[ClassGroups.Length];
+        int NumGroups = 0;
+        for (int i = 0; i < ClassGroups.Length; i++)
+        {
+            int V = int.Parse(ClassGroups[i]);
+            if (V > NumGroups) NumGroups = V;
+            IndexParser[i] = V - 1;
+        }
 
         int HighestIndex = 0;
         for (int i = 0; i < DataSet.Length; i++)
@@ -58,7 +69,7 @@ public class ImageDataSet : DataSet
             Data D = new Data()
             {
                 Input = DataSetFilePath + @"\" + Parse[0],
-                ExpectedOutputIndex = (index - 1)
+                ExpectedOutputIndex = IndexParser[index - 1]
             };
             if (Parse[2] == "FALSE")
                 TrainingSet.Add(D);
@@ -73,7 +84,8 @@ public class ImageDataSet : DataSet
             ExpectedClassificationValues[i].Buffer[i] = 1;
             ExpectedClassificationValues[i].SetData();
         }
-        OutputDataSize = new TensorSize(HighestIndex);
+        OutputDataSize = new TensorSize(NumGroups);
+        Debug.Log(NumGroups);
     }
 }
 
