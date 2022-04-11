@@ -34,19 +34,20 @@ public class DenseLayer : Layer
 
         RenderLength = (int)Mathf.Sqrt(OutputTensor.Width) + 1;
 
-        OutputRender.Release();
-        OutputRender.width = RenderLength;
-        OutputRender.height = RenderLength;
-        OutputRender.Create();
+        OutputRender[0].Release();
+        OutputRender[0].width = RenderLength;
+        OutputRender[0].height = RenderLength;
+        OutputRender[0].Create();
 
-        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender);
+        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender[0]);
 
         FilterOperation.SetInt("Depth", 1);
         FilterOperation.SetInt("ConvolutionWidth", RenderLength);
         FilterOperation.SetInt("ConvolutionHeight", RenderLength);
 
         InitDebug();
-        DebugObject.name = "DenseLayer";
+        for (int i = 0; i < DebugObject.Length; i++)
+            DebugObject[i].name = "DenseLayer";
     }
 
     protected override void Release() { }

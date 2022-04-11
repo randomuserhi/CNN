@@ -48,8 +48,18 @@ public class Learning
         if (IterNum >= Tests[BatchNum].Questions.Count) Batch();
         if (BatchNum >= Tests.Count) Epoch();
         BatchEvals[IterNum] = N.Backpropagation(ImageFilePath + System.IO.Path.DirectorySeparatorChar + Tests[BatchNum].Questions[IterNum].Input, Tests[BatchNum].Questions[IterNum].ExpectedOutput);
+        UI.ResponseText.text = "Img: " + Tests[BatchNum].Questions[IterNum].Input + "\nExpected: " + DataSet.IDToClass[Network.GetIndex(BatchEvals[IterNum].Expected.Buffer)] + "\nAnswer: " + DataSet.IDToClass[Network.GetIndex(BatchEvals[IterNum].Output.Buffer)];
         Debug.Log("Iteration: " + BatchEvals[BatchNum].ErrorCost);
         IterNum++;
+    }
+
+    private int TestIndex = 0;
+    public void Test()
+    {
+        Matrix O = N.ForwardPropagate(ImageFilePath + System.IO.Path.DirectorySeparatorChar + DataSet.Test[TestIndex].Input);
+        UI.ResponseText.text = "Img: " + DataSet.Test[TestIndex].Input + "\nExpected: " + DataSet.IDToClass[Network.GetIndex(DataSet.Test[TestIndex].ExpectedOutput.Buffer)] + "\nAnswer: " + DataSet.IDToClass[Network.GetIndex(O.Buffer)];
+        TestIndex++;
+        if (TestIndex >= DataSet.Test.Count) TestIndex = 0;
     }
 
     private void Batch()

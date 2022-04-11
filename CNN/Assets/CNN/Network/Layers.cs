@@ -57,24 +57,30 @@ public abstract class Layer
 
     #region Debugging
 
-    protected GameObject DebugObject;
-    protected RenderTexture OutputRender;
+    protected GameObject[] DebugObject;
+    protected RenderTexture[] OutputRender;
 
     protected void InitDebug()
     {
         if (DebugObject == null)
         {
-            DebugObject = new GameObject();
-            DebugObject.transform.position = new Vector3(RenderOffset++, 0, 0);
-            DebugObject.AddComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-            DebugObject.AddComponent<CanvasScaler>();
-            DebugObject.AddComponent<GraphicRaycaster>();
-            DebugObject.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
-            DebugObject.AddComponent<RawImage>();
+            RenderOffset++;
+            DebugObject = new GameObject[OutputTensor.Depth];
+            for (int i = 0; i < OutputTensor.Depth; i++)
+            {
+                DebugObject[i] = new GameObject();
+                DebugObject[i].transform.position = new Vector3(RenderOffset * 1.2f - 10f/2f, OutputTensor.Depth / 2f - i - 0.5f, 0);
+                DebugObject[i].AddComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                DebugObject[i].AddComponent<CanvasScaler>();
+                DebugObject[i].AddComponent<GraphicRaycaster>();
+                DebugObject[i].GetComponent<RectTransform>().sizeDelta = Vector2.zero;
+                DebugObject[i].AddComponent<RawImage>();
+
+                RawImage Image = DebugObject[i].GetComponent<RawImage>();
+                Image.rectTransform.sizeDelta = new Vector2(1, 1);
+                Image.texture = OutputRender[i];
+            }
         }
-        RawImage Image = DebugObject.GetComponent<RawImage>();
-        Image.rectTransform.sizeDelta = new Vector2(1, 1);
-        Image.texture = OutputRender;
     }
 
     #endregion
@@ -87,19 +93,23 @@ public abstract class Layer
         this.InputTensor = InputTensor;
         this.OutputTensor = OutputTensor;
 
-        OutputRender = new RenderTexture(OutputTensor.Width, OutputTensor.Height, 8)
+        OutputRender = new RenderTexture[OutputTensor.Depth];
+        for (int i = 0; i < OutputTensor.Depth; i++)
         {
-            enableRandomWrite = true,
-            filterMode = FilterMode.Point,
-            anisoLevel = 1
-        };
-        OutputRender.Create();
+            OutputRender[i] = new RenderTexture(OutputTensor.Width, OutputTensor.Height, 8)
+            {
+                enableRandomWrite = true,
+                filterMode = FilterMode.Point,
+                anisoLevel = 1
+            };
+            OutputRender[i].Create();
+        }
 
         FilterOperation = UnityEngine.Object.Instantiate(Resources.Load<ComputeShader>("FilterOperation"));
         GetGenerateTextureKernel();
         RenderBuffer = new ComputeBuffer(OutputTensor.Width * OutputTensor.Height * OutputTensor.Depth, sizeof(float));
         FilterOperation.SetBuffer(GenerateTextureKernelIndex, "Tensor", RenderBuffer);
-        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender);
+        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender[0]);
 
         FilterOperation.SetInt("Depth", InputTensor.Depth);
         FilterOperation.SetInt("ConvolutionWidth", OutputTensor.Width);

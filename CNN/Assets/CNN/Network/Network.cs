@@ -121,6 +121,11 @@ public class Network
     {
         
     }
+    public static int GetIndex(float[] Buffer)
+    {
+        var (Number, Index) = Buffer.Select((n, i) => (n, i)).Max();
+        return Index + 1;
+    }
 
     public string Export(string FilePath, string FileName)
     {
@@ -200,7 +205,13 @@ public class Network
         }
 
         if (AssignInput)
-            Model[0].AssignInput(Input);
+        {
+            Texture2D Texture = new Texture2D(2, 2);
+            Texture.LoadImage(File.ReadAllBytes((string)Input));
+            Model[0].AssignInput(Texture);
+            CNN.Image.texture = Texture;
+            Resources.UnloadUnusedAssets();
+        }
         for (int i = 1; i < Model.Count; i++)
         {
             Model[i - 1].ForwardProp();

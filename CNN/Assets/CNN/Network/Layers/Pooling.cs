@@ -74,7 +74,8 @@ public class Pooling : Layer
 
         Output = new Matrix(OutputTensor.Depth, OutputTensor.Width * OutputTensor.Height);
 
-        DebugObject.name = "Pooling Layer";
+        for (int i = 0; i < DebugObject.Length; i++)
+            DebugObject[i].name = "Pooling Layer";
     }
 
     protected override void Release()
@@ -118,10 +119,14 @@ public class Pooling : Layer
 
     public override void Render(int RenderIndex)
     {
-        FilterOperation.SetInt("FilterIndex", RenderIndex);
-        FilterOperation.SetInt("NumFeatureMaps", OutputTensor.Depth);
-        FilterOperation.SetInt("RenderBufferLength", Output.Buffer.Length);
-        RenderBuffer.SetData(Output.GetData());
-        FilterOperation.Dispatch(GenerateTextureKernelIndex, OutputTensor.Width / 8 + 1, OutputTensor.Height / 8 + 1, 1);
+        for (int i = 0; i < OutputTensor.Depth; i++)
+        {
+            FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender[i]);
+            FilterOperation.SetInt("FilterIndex", i);
+            FilterOperation.SetInt("NumFeatureMaps", OutputTensor.Depth);
+            FilterOperation.SetInt("RenderBufferLength", Output.Buffer.Length);
+            RenderBuffer.SetData(Output.GetData());
+            FilterOperation.Dispatch(GenerateTextureKernelIndex, OutputTensor.Width / 8 + 1, OutputTensor.Height / 8 + 1, 1);
+        }
     }
 }

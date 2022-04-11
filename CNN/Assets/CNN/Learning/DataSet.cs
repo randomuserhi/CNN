@@ -17,6 +17,7 @@ public class DataSet
     public string ClassNameFilePath;
     public string QuestionAnswerFilePath;
 
+    public Dictionary<int, string> IDToClass = new Dictionary<int, string>();
     public Dictionary<int, int> IDToGroup = new Dictionary<int, int>();
     public Dictionary<int, List<string>> IDToClassName = new Dictionary<int, List<string>>();
     public List<Question> Test = new List<Question>();
@@ -32,12 +33,13 @@ public class DataSet
 
         for (int i = 1; i < Classes.Length + 1; i++)
         {
+            IDToClass.Add(int.Parse(Grouping[i - 1]), Classes[i - 1]);
             IDToGroup.Add(i, int.Parse(Grouping[i - 1]));
         }
 
         string[] Questions = File.ReadAllLines(QuestionAnswerFilePath);
         int NumAnswers = 0;
-        for (int i = 1; i < Questions.Length; i++)
+        for (int i = 0; i < Questions.Length; i++)
         {
             string[] Question = Questions[i].Split(',');
             int ID = IDToGroup[int.Parse(Question[0])];
@@ -49,7 +51,7 @@ public class DataSet
         }
 
         List<int> PotentialAnswers = IDToClassName.Keys.ToList();
-        for (int i = 1; i < Questions.Length; i++)
+        for (int i = 0; i < Questions.Length; i++)
         {
             string[] Question = Questions[i].Split(',');
             Matrix Answer = new Matrix(1, NumAnswers);

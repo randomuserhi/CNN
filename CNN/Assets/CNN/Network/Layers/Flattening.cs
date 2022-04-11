@@ -14,19 +14,20 @@ public class Flattening : Layer
 
         Output = new Matrix(1, OutputTensor.Width);
 
-        OutputRender.Release();
-        OutputRender.width = RenderLength;
-        OutputRender.height = RenderLength;
-        OutputRender.Create();
+        OutputRender[0].Release();
+        OutputRender[0].width = RenderLength;
+        OutputRender[0].height = RenderLength;
+        OutputRender[0].Create();
 
-        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender);
+        FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender[0]);
 
         FilterOperation.SetInt("Depth", 1);
         FilterOperation.SetInt("ConvolutionWidth", RenderLength);
         FilterOperation.SetInt("ConvolutionHeight", RenderLength);
 
         InitDebug();
-        DebugObject.name = "FlatteningLayer";
+        for (int i = 0; i < DebugObject.Length; i++)
+            DebugObject[i].name = "FlatteningLayer";
     }
 
     protected override void Release()

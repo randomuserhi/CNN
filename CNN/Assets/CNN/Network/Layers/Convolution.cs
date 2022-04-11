@@ -313,11 +313,15 @@ public abstract class ConvolutionLayer : Layer
 
     public override void Render(int RenderIndex)
     {
-        FilterOperation.SetInt("FilterIndex", RenderIndex);
-        FilterOperation.SetInt("NumFeatureMaps", OutputTensor.Depth);
-        FilterOperation.SetInt("RenderBufferLength", Output.Buffer.Length);
-        RenderBuffer.SetData(Output.GetData());
-        FilterOperation.Dispatch(GenerateTextureKernelIndex, OutputTensor.Width / 8 + 1, OutputTensor.Height / 8 + 1, 1);
+        for (int i = 0; i < OutputTensor.Depth; i++)
+        {
+            FilterOperation.SetTexture(GenerateTextureKernelIndex, "Output", OutputRender[i]);
+            FilterOperation.SetInt("FilterIndex", i);
+            FilterOperation.SetInt("NumFeatureMaps", OutputTensor.Depth);
+            FilterOperation.SetInt("RenderBufferLength", Output.Buffer.Length);
+            RenderBuffer.SetData(Output.GetData());
+            FilterOperation.Dispatch(GenerateTextureKernelIndex, OutputTensor.Width / 8 + 1, OutputTensor.Height / 8 + 1, 1);
+        }
     }
 }
 
@@ -326,7 +330,8 @@ public class ConvolutionTextureLayer : ConvolutionLayer
     public ConvolutionTextureLayer(TensorSize InputTensor, int NumFilters, int ZeroPadding, int FilterSize, int Stride, ActivationType ActivationFunction = ActivationType.Tanh)
         : base(InputTensor, NumFilters, ZeroPadding, FilterSize, Stride, ActivationFunction)
     {
-        DebugObject.name = "ConvolutionTextureLayer"; 
+        for (int i = 0; i < DebugObject.Length; i++)
+            DebugObject[i].name = "ConvolutionTextureLayer"; 
     }
 
     protected override void PrepareInput()
@@ -404,7 +409,8 @@ public class ConvolutionMatrixLayer : ConvolutionLayer
     public ConvolutionMatrixLayer(TensorSize InputTensor, int NumFilters, int ZeroPadding, int FilterSize, int Stride, ActivationType ActivationFunction = ActivationType.Tanh)
         : base(InputTensor, NumFilters, ZeroPadding, FilterSize, Stride, ActivationFunction)
     {
-        DebugObject.name = "ConvolutionMatrixLayer";
+        for (int i = 0; i < DebugObject.Length; i++)
+            DebugObject[i].name = "ConvolutionMatrixLayer";
     }
 
     protected override void PrepareInput()

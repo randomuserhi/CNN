@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CNN
 {
@@ -8,8 +9,12 @@ public class CNN
     public static Learning TeacherBot;
     public static Network N = new Network();
 
-    public static void Start()
+    public static RawImage Image;
+
+    public static void Start(RawImage Image)
     {
+        CNN.Image = Image;
+
         Matrix.LoadDLL();
 
         N.CostFunc = Network.CostFunctionType.MeanSquaredError;
@@ -28,12 +33,23 @@ public class CNN
     }
 
     public static bool Learning = true;
+    public static bool Test = true;
     public static int RenderLayer = 0;
     public static int PrevRenderLayer = -1;
+    private static float Timer = 0;
     public static void Update()
     {
         if (Learning == true) TeacherBot.Teach();
-        if (RenderLayer != PrevRenderLayer || Learning)
+        else if (Test == true)
+        {
+            Timer += Time.deltaTime;
+            if (Timer > 1)
+            {
+                Timer = 0;
+                TeacherBot.Test();
+            }
+        }
+        if (RenderLayer != PrevRenderLayer || Learning || Test)
         {
             PrevRenderLayer = RenderLayer;
             N.Render(RenderLayer);
