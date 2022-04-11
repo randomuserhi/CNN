@@ -1,2 +1,2 @@
 # CNN
-I dont know what im doing pls help
+CNN programmed from scratch using Eigen
